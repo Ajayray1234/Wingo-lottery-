@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wingo Lottery Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .cyan {
+            color: #00b7ff;
+            font-size: 2.5rem; /* Increased font size for heading */
+        }
+        .green {
+            color: #28a745;
+        }
+        .magenta {
+            color: #e2008c;
+        }
+        .timer {
+            font-size: 1.5rem; /* Normal size for timer */
+            color: #f0ad4e;
+        }
+        .period {
+            font-size: 1.5rem; /* Normal size for period */
+        }
+        .result {
+            font-size: 1.8rem; /* Normal size for result */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="welcomeMessage" class="cyan"></div>
+    <div id="period" class="period"></div>
+    <div id="result" class="result"></div>
+    <div id="timer" class="timer"></div>
+
+    <script>
+        // Results pattern
+        const results = [
+            "SMALL", "BIG", "SMALL", "SMALL", "BIG", "SMALL", "BIG", "BIG",
+            "SMALL", "BIG", "BIG", "SMALL", "SMALL", "BIG", "BIG", "SMALL",
+            "SMALL", "SMALL", "BIG", "SMALL", "SMALL", "BIG", "SMALL",
+            "SMALL", "SMALL", "BIG", "SMALL", "SMALL", "BIG", "BIG",
+            "BIG", "SMALL", "BIG", "BIG", "SMALL", "SMALL", "BIG",
+            "SMALL", "BIG", "SMALL"
+        ];
+
+        function rollingText(message) {
+            let index = 0;
+            let element = document.getElementById("welcomeMessage");
+            function type() {
+                if (index < message.length) {
+                    element.innerHTML += message.charAt(index);
+                    index++;
+                    setTimeout(type, 100);
+                }
+            }
+            type();
+        }
+
+        function updatePeriodAndResult() {
+            const now = new Date();
+            const year = now.getUTCFullYear();
+            const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(now.getUTCDate()).padStart(2, '0');
+            const hours = now.getUTCHours();
+            const minutes = now.getUTCMinutes();
+            const seconds = now.getUTCSeconds();
+            const remainingSeconds = 60 - seconds;
+
+            const totalMinutes = hours * 60 + minutes;
+            const periodNumber = 10001 + totalMinutes;
+            const periodString = `${year}${month}${day}${periodNumber}`;
+
+            const patternIndex = (periodNumber - 10001) % results.length;
+            const actualResult = results[patternIndex];
+
+            return { periodString, actualResult, remainingSeconds };
+        }
+
+        function countdownTimer(seconds) {
+            let timerElement = document.getElementById("timer");
+            let countdown = setInterval(() => {
+                timerElement.innerHTML = `Timer: ${seconds}s`;
+                if (seconds <= 0) {
+                    clearInterval(countdown);
+                } else {
+                    seconds--;
+                }
+            }, 1000);
+        }
+
+        function updateUI() {
+            const { periodString, actualResult, remainingSeconds } = updatePeriodAndResult();
+
+            document.getElementById("period").innerText = `Period: ${periodString}`;
+            
+            const resultElement = document.getElementById("result");
+            resultElement.innerText = actualResult;
+
+            if (actualResult === "BIG") {
+                resultElement.className = "result green";
+            } else {
+                resultElement.className = "result magenta";
+            }
+
+            countdownTimer(remainingSeconds);
+        }
+
+        // Main execution
+        rollingText("Welcome to Wingo Lottery Game, Owner AjAy Bhay!");
+
+        setInterval(updateUI, 60000); // Update every minute
+
+    </script>
+</body>
+</html>
